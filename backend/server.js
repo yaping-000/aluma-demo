@@ -328,5 +328,26 @@ Client Follow-up Email:`
   }
 })
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err)
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res
+        .status(400)
+        .json({ error: "File too large. Maximum size is 25MB." })
+    }
+    return res.status(400).json({ error: "File upload error: " + err.message })
+  }
+
+  res.status(500).json({ error: "Internal server error" })
+})
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Endpoint not found" })
+})
+
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`API listening on :${PORT}`))
