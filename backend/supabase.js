@@ -7,14 +7,24 @@ dotenv.config()
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    "Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY"
+// Make Supabase optional for demo deployment
+let supabase = null
+
+if (supabaseUrl && supabaseAnonKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey)
+    console.log("✅ Supabase client initialized successfully")
+  } catch (error) {
+    console.warn("⚠️ Failed to initialize Supabase client:", error.message)
+    supabase = null
+  }
+} else {
+  console.warn(
+    "⚠️ Supabase environment variables not set. Analytics will be disabled."
   )
-  process.exit(1)
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export { supabase }
 
 /**
  * Database Operations for User Management
@@ -37,6 +47,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
  * @returns {Object} - Inserted user data with UUID
  */
 export async function insertUser(userData) {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Skipping user insertion.")
+    return { id: "demo-user-" + Date.now() }
+  }
+
   try {
     const { data, error } = await supabase
       .from("users")
@@ -79,6 +94,11 @@ export async function insertUser(userData) {
  * @returns {Object} - User data for AI context
  */
 export async function getUserByEmail(email) {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Returning null user.")
+    return null
+  }
+
   try {
     const { data, error } = await supabase
       .from("users")
@@ -114,6 +134,11 @@ export async function getUserByEmail(email) {
  * @returns {Object} - Inserted session data with UUID
  */
 export async function insertSession(sessionData) {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Skipping session insertion.")
+    return { id: "demo-session-" + Date.now() }
+  }
+
   try {
     const { data, error } = await supabase
       .from("sessions")
@@ -147,6 +172,11 @@ export async function insertSession(sessionData) {
  * @returns {Array} - Array of user's sessions
  */
 export async function getUserSessions(userId) {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Returning empty sessions.")
+    return []
+  }
+
   try {
     const { data, error } = await supabase
       .from("sessions")
@@ -171,6 +201,16 @@ export async function getUserSessions(userId) {
  * @returns {Object} - Analytics data including user counts, session counts, etc.
  */
 export async function getDemoAnalytics() {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Returning demo analytics.")
+    return {
+      totalUsers: 0,
+      totalSessions: 0,
+      careerCoaches: 0,
+      nonCareerCoaches: 0,
+    }
+  }
+
   try {
     // Get total users
     const { count: totalUsers } = await supabase
