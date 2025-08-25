@@ -53,26 +53,24 @@ export async function insertUser(userData) {
   }
 
   try {
+    console.log("Inserting user data:", userData)
+
+    const insertData = {
+      name: userData.name,
+      email: userData.email,
+      business_name: userData.company || null,
+      is_career_coach: userData.isCareerCoach === "Yes",
+      coaching_expertise: userData.coachingNiche || null,
+      profession: userData.profession || null,
+      consent: userData.emailContact === "Yes",
+      additional_context: userData.goals || null,
+    }
+
+    console.log("Processed insert data:", insertData)
+
     const { data, error } = await supabase
       .from("users")
-      .insert([
-        {
-          name: userData.name,
-          email: userData.email,
-          business_name: userData.businessName,
-          is_career_coach: userData.isCareerCoach === "Yes",
-          coaching_expertise:
-            userData.coachingExpertise === "other"
-              ? userData.otherExpertise
-              : userData.coachingExpertise,
-          profession: userData.profession,
-          years_of_experience: userData.yearsOfExperience
-            ? parseInt(userData.yearsOfExperience)
-            : null,
-          consent: userData.consent,
-          additional_context: userData.additionalContext,
-        },
-      ])
+      .insert([insertData])
       .select()
 
     if (error) {
@@ -140,6 +138,12 @@ export async function insertSession(sessionData) {
   }
 
   try {
+    // Only insert if userId is provided, otherwise skip
+    if (!sessionData.userId) {
+      console.log("No userId provided, skipping session insertion")
+      return { id: "demo-session-" + Date.now() }
+    }
+
     const { data, error } = await supabase
       .from("sessions")
       .insert([

@@ -29,13 +29,24 @@ const upload = multer({
       cb(null, `${name}-${Date.now()}${ext}`)
     },
   }),
-  limits: { fileSize: 25 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 }, // Increased to 100MB for larger video files
   fileFilter: (req, file, cb) => {
     const isImg = file.mimetype.startsWith("image/")
     const isAud = file.mimetype.startsWith("audio/")
     const isVid = file.mimetype.startsWith("video/")
-    if (!isImg && !isAud && !isVid)
-      return cb(new Error("Only image/*, audio/*, or video/*"))
+    const isText =
+      file.mimetype === "text/plain" ||
+      file.mimetype === "application/pdf" ||
+      file.mimetype === "application/msword" ||
+      file.mimetype ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+    if (!isImg && !isAud && !isVid && !isText)
+      return cb(
+        new Error(
+          "Only image/*, audio/*, video/*, or document files are supported"
+        )
+      )
     cb(null, true)
   },
 })
@@ -47,17 +58,26 @@ if (process.env.OPENAI_API_KEY) {
   openai = null
 }
 
-const visionClient = new vision.ImageAnnotatorClient(
-  process.env.GCP_CREDENTIALS_B64
-    ? {
-        credentials: JSON.parse(
-          Buffer.from(process.env.GCP_CREDENTIALS_B64, "base64").toString(
-            "utf8"
-          )
-        ),
-      }
-    : undefined
-)
+let visionClient = null
+if (process.env.GCP_CREDENTIALS_B64) {
+  try {
+    visionClient = new vision.ImageAnnotatorClient({
+      credentials: JSON.parse(
+        Buffer.from(process.env.GCP_CREDENTIALS_B64, "base64").toString("utf8")
+      ),
+    })
+  } catch (error) {
+    console.warn(
+      "⚠️ Failed to initialize Google Cloud Vision client:",
+      error.message
+    )
+    visionClient = null
+  }
+} else {
+  console.warn(
+    "⚠️ GCP_CREDENTIALS_B64 not set. Image processing will be disabled."
+  )
+}
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -78,6 +98,11 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
   try {
     if (kind === "image") {
+      if (!visionClient) {
+        throw new Error(
+          "Google Cloud Vision not configured. Image processing is disabled."
+        )
+      }
       const [result] = await visionClient.textDetection(filePath)
       text =
         result?.textAnnotations?.[0]?.description?.trim() || "No text found."
@@ -88,6 +113,19 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         model: "whisper-1",
       })
       text = resp?.text?.trim() || "No transcript."
+    } else if (mimeType === "text/plain") {
+      // Read text file directly
+      text = fs.readFileSync(filePath, "utf8").trim()
+    } else if (
+      mimeType === "application/pdf" ||
+      mimeType === "application/msword" ||
+      mimeType ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      // For now, return a placeholder for document processing
+      // In a full implementation, you'd use libraries like pdf-parse, mammoth, etc.
+      text =
+        "Document processing not yet implemented. Please use text files, images, audio, or video files."
     }
 
     const meta = {
@@ -114,8 +152,11 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
     res.json({ text, meta })
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: "Processing failed." })
+    console.error("Upload processing error:", err)
+    res.status(500).json({
+      error: "Processing failed.",
+      details: err.message,
+    })
   } finally {
     try {
       fs.unlinkSync(filePath)
