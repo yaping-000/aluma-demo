@@ -1,47 +1,22 @@
 #!/bin/bash
 
-# Update Vercel Configuration Script
-# This script helps update the Vercel config with your Railway URL
+# Script to update Vercel configuration with the correct backend URL
+# Usage: ./update-vercel-config.sh <your-railway-backend-url>
 
-echo "🔧 Vercel Configuration Update Script"
-echo "====================================="
-
-# Get Railway URL from user
-echo ""
-echo "Please enter your Railway URL (e.g., https://your-app.railway.app):"
-read RAILWAY_URL
-
-if [ -z "$RAILWAY_URL" ]; then
-    echo "❌ Railway URL is required. Please run the script again."
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <your-railway-backend-url>"
+    echo "Example: $0 https://aluma-backend-production.up.railway.app"
     exit 1
 fi
 
-# Remove trailing slash if present
-RAILWAY_URL=$(echo $RAILWAY_URL | sed 's/\/$//')
+BACKEND_URL=$1
 
-echo ""
-echo "📝 Updating Vercel configuration..."
+# Update vercel.json with the correct backend URL
+sed -i.bak "s|https://aluma-backend-production.up.railway.app|$BACKEND_URL|g" frontend/vercel.json
 
-# Update vercel.json
-sed -i.bak "s|https://your-railway-url.railway.app|$RAILWAY_URL|g" frontend/vercel.json
-
-echo "✅ Updated frontend/vercel.json"
-echo "✅ Railway URL set to: $RAILWAY_URL"
-
-echo ""
-echo "📋 Next Steps:"
-echo "1. Commit and push these changes:"
-echo "   git add frontend/vercel.json"
-echo "   git commit -m 'Update Vercel config with Railway URL'"
-echo "   git push origin main"
-echo ""
-echo "2. In Railway dashboard, add environment variable:"
-echo "   FRONTEND_ORIGIN=https://your-vercel-app.vercel.app"
-echo ""
-echo "3. Test your deployment:"
-echo "   - Visit your Vercel URL"
-echo "   - Test the demo functionality"
-echo "   - Check that API calls work"
-
-echo ""
-echo "🎯 Your app should now be fully connected!" 
+echo "✅ Updated vercel.json with backend URL: $BACKEND_URL"
+echo "📝 Don't forget to:"
+echo "   1. Deploy your backend to Railway first"
+echo "   2. Update the URL in vercel.json with your actual Railway URL"
+echo "   3. Deploy your frontend to Vercel"
+echo "   4. Run the migration.sql in your Supabase SQL Editor" 

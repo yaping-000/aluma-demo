@@ -1,80 +1,114 @@
 #!/bin/bash
 
 # Aluma Demo Deployment Script
-# This script helps prepare and deploy the app to Vercel + Railway
+# This script deploys the frontend to Vercel and backend to Railway
 
-echo "🚀 Aluma Demo Deployment Script"
-echo "================================"
+set -e
 
-# Check if git is initialized
-if [ ! -d ".git" ]; then
-    echo "❌ Git repository not found. Please initialize git first:"
-    echo "   git init"
-    echo "   git add ."
-    echo "   git commit -m 'Initial commit'"
-    exit 1
-fi
+echo "🚀 Starting Aluma Demo Deployment..."
 
-# Check if remote is set
-if ! git remote get-url origin > /dev/null 2>&1; then
-    echo "❌ Git remote not set. Please add your GitHub repository:"
-    echo "   git remote add origin https://github.com/yourusername/aluma-demo.git"
-    exit 1
-fi
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-echo "✅ Git repository ready"
+# Function to print colored output
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
 
-# Check environment files
-echo ""
-echo "📋 Environment Setup Check:"
-echo "=========================="
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
 
-if [ ! -f "backend/.env" ]; then
-    echo "⚠️  backend/.env not found. Please create it with:"
-    echo "   - OPENAI_API_KEY"
-    echo "   - SUPABASE_URL"
-    echo "   - SUPABASE_ANON_KEY"
-    echo "   - GCP_CREDENTIALS_B64 (optional)"
-else
-    echo "✅ backend/.env found"
-fi
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
 
-if [ ! -f "frontend/.env" ]; then
-    echo "⚠️  frontend/.env not found. Please create it with:"
-    echo "   - VITE_API_BASE_URL (will be updated after Railway deployment)"
-else
-    echo "✅ frontend/.env found"
-fi
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
 
-echo ""
-echo "🔧 Deployment Steps:"
-echo "==================="
-echo ""
-echo "1. 🚂 Deploy Backend to Railway:"
-echo "   - Go to https://railway.app"
-echo "   - Connect your GitHub repository"
-echo "   - Select 'backend' folder"
-echo "   - Set environment variables (see backend/production-setup.md)"
-echo "   - Deploy and get your Railway URL"
-echo ""
-echo "2. 🌐 Deploy Frontend to Vercel:"
-echo "   - Go to https://vercel.com"
-echo "   - Connect your GitHub repository"
-echo "   - Select 'frontend' folder"
-echo "   - Set environment variables:"
-echo "     VITE_API_BASE_URL=https://your-railway-url.railway.app/upload"
-echo "   - Deploy"
-echo ""
-echo "3. 🔗 Update Configuration:"
-echo "   - Update frontend/vercel.json with your Railway URL"
-echo "   - Update Railway CORS settings with your Vercel URL"
-echo ""
-echo "4. 🧪 Test Deployment:"
-echo "   - Test health check: https://your-railway-url.railway.app/health"
-echo "   - Test frontend: https://your-app.vercel.app"
-echo ""
-echo "📚 For detailed instructions, see:"
-echo "   - backend/production-setup.md"
-echo "   - SUPABASE_INTEGRATION.md"
-echo ""
-echo "🎯 Ready to deploy! Follow the steps above." 
+# Check if required tools are installed
+check_dependencies() {
+    print_status "Checking dependencies..."
+    
+    if ! command -v vercel &> /dev/null; then
+        print_error "Vercel CLI is not installed. Please install it with: npm i -g vercel"
+        exit 1
+    fi
+    
+    if ! command -v railway &> /dev/null; then
+        print_error "Railway CLI is not installed. Please install it with: npm i -g @railway/cli"
+        exit 1
+    fi
+    
+    print_success "All dependencies are installed"
+}
+
+# Deploy backend to Railway
+deploy_backend() {
+    print_status "Deploying backend to Railway..."
+    
+    cd backend
+    
+    # Check if Railway project is linked
+    if [ ! -f ".railway" ]; then
+        print_warning "Railway project not linked. Please run: railway login && railway link"
+        print_status "You can also deploy manually by running: railway up"
+        cd ..
+        return
+    fi
+    
+    # Deploy to Railway
+    railway up --detach
+    
+    cd ..
+    print_success "Backend deployment initiated"
+}
+
+# Deploy frontend to Vercel
+deploy_frontend() {
+    print_status "Deploying frontend to Vercel..."
+    
+    cd frontend
+    
+    # Check if Vercel project is linked
+    if [ ! -f ".vercel" ]; then
+        print_warning "Vercel project not linked. Please run: vercel"
+        print_status "You can also deploy manually by running: vercel --prod"
+        cd ..
+        return
+    fi
+    
+    # Deploy to Vercel
+    vercel --prod
+    
+    cd ..
+    print_success "Frontend deployment initiated"
+}
+
+# Main deployment process
+main() {
+    print_status "Starting deployment process..."
+    
+    # Check dependencies
+    check_dependencies
+    
+    # Deploy backend first
+    deploy_backend
+    
+    # Wait a moment for backend to start
+    sleep 5
+    
+    # Deploy frontend
+    deploy_frontend
+    
+    print_success "Deployment process completed!"
+    print_status "Check your Railway and Vercel dashboards for deployment status"
+}
+
+# Run main function
+main "$@" 
