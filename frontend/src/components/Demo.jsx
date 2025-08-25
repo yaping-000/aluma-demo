@@ -77,7 +77,7 @@ const Demo = () => {
         })
       }, 200)
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("http://localhost:3000/upload", {
         method: "POST",
         body: formDataToSend,
       })
@@ -127,13 +127,14 @@ const Demo = () => {
     setIsGenerating(true)
 
     try {
-      const response = await fetch("/api/generate", {
+      const response = await fetch("http://localhost:3000/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: extractedText,
           formats: selectedFormats,
           userContext: formData,
+          userId: userId,
         }),
       })
 
@@ -195,7 +196,7 @@ const Demo = () => {
     <div className="demo-container">
       <div className="demo-header">
         <h1>🚀 Aluma Demo</h1>
-        <p>Transform your content into professional communications</p>
+        <p>Explore one of Aluma's content workflows you could set up</p>
       </div>
 
       <div className="demo-progress">

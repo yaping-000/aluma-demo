@@ -12,7 +12,7 @@ const FileUpload = ({
   setExtractedText,
   userId,
 }) => {
-  const [inputMethod, setInputMethod] = useState("file") // "file", "text", "audio"
+  const [inputMethod, setInputMethod] = useState("text") // "file", "text", "audio" (file upload temporarily disabled)
   const [textInput, setTextInput] = useState("")
   const [isRecording, setIsRecording] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -128,7 +128,7 @@ const FileUpload = ({
         formData.append("userId", userId)
       }
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("http://localhost:3000/upload", {
         method: "POST",
         body: formData,
       })
@@ -155,7 +155,8 @@ const FileUpload = ({
     }
   }
 
-  // Auto-process file when selected
+  // Auto-process file when selected - Temporarily disabled for demo
+  /*
   const handleFileChangeWithAutoProcess = (e) => {
     const selectedFile = e.target.files[0]
     if (selectedFile) {
@@ -179,6 +180,7 @@ const FileUpload = ({
       handleUpload(selectedFile)
     }
   }
+  */
 
   // Check if we can continue to next step
   const canContinue = () => {
@@ -206,20 +208,26 @@ const FileUpload = ({
     <div className="demo-step">
       <h2>Add your content</h2>
       <p className="step-description">
-        Choose how you'd like to input your content for processing
+        Enter your content using text or audio recording
       </p>
 
       {/* Input Method Selection */}
       <div className="input-method-selector">
         <div className="method-options">
-          <button
+          {/* File upload temporarily disabled for demo */}
+          {/* To re-enable file upload:
+              1. Uncomment the button below
+              2. Uncomment the file upload section below
+              3. Uncomment the handleFileChangeWithAutoProcess function
+              4. Change default inputMethod back to "file" */}
+          {/* <button
             className={`method-option ${
               inputMethod === "file" ? "active" : ""
             }`}
             onClick={() => setInputMethod("file")}
           >
             📁 Upload File
-          </button>
+          </button> */}
           <button
             className={`method-option ${
               inputMethod === "text" ? "active" : ""
@@ -239,8 +247,8 @@ const FileUpload = ({
         </div>
       </div>
 
-      {/* File Upload Section */}
-      {inputMethod === "file" && (
+      {/* File Upload Section - Temporarily disabled for demo */}
+      {/* {inputMethod === "file" && (
         <div className="input-section">
           <div className="upload-area">
             <input
@@ -297,7 +305,7 @@ const FileUpload = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       {/* Text Input Section */}
       {inputMethod === "text" && (

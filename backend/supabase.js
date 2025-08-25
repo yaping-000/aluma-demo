@@ -55,24 +55,37 @@ export async function insertUser(userData) {
   try {
     console.log("Inserting user data:", userData)
 
+    const toBoolean = (value) => {
+      if (typeof value === "boolean") return value
+      if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase()
+        return (
+          normalized === "yes" || normalized === "true" || normalized === "1"
+        )
+      }
+      if (typeof value === "number") return value === 1
+      return false
+    }
+
     const insertData = {
       name: userData.name,
       email: userData.email,
       business_name: userData.company || null,
-      is_career_coach:
-        userData.isCareerCoach === "Yes" || userData.isCareerCoach === true,
+      is_career_coach: toBoolean(userData.isCareerCoach),
       coaching_expertise: userData.coachingNiche || null,
       profession: userData.profession || null,
       ideal_client: userData.idealClient || null,
-      consent: userData.emailContact === "Yes" || userData.consent === true,
+      consent: toBoolean(userData.emailContact) || toBoolean(userData.consent),
       additional_context: userData.goals || null,
+      form_source: userData.formSource || "demo", // 'demo' or 'contact'
+      beta_waitlist_consent: toBoolean(userData.betaWaitlistConsent),
     }
 
     console.log("Processed insert data:", insertData)
 
     const { data, error } = await supabase
       .from("users")
-      .insert([insertData])
+      .upsert(insertData, { onConflict: "email" })
       .select()
 
     if (error) {

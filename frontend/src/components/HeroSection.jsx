@@ -104,16 +104,6 @@ const HeroSection = () => {
                 </Link>
               </motion.div>
             </motion.div>
-
-            <motion.div className="hero-testimonial" variants={itemVariants}>
-              <div className="testimonial-content">
-                <div className="testimonial-quote">
-                  "Aluma saved me hours every week and helped me attract my
-                  dream clients effortlessly."
-                </div>
-                <div className="testimonial-author">– Jane, Life Coach</div>
-              </div>
-            </motion.div>
           </div>
 
           {/* Right Column - Illustration */}

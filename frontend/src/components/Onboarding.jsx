@@ -42,12 +42,15 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
 
     try {
       // Save user data to Supabase
-      const response = await fetch("/api/onboarding", {
+      const response = await fetch("http://localhost:3000/onboarding", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          formSource: "demo",
+        }),
       })
 
       if (!response.ok) {
@@ -60,6 +63,7 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
       // Save userId for session tracking
       if (data.userId) {
         setUserId(data.userId)
+        console.log("User ID saved for session tracking:", data.userId)
       }
 
       // Continue to next step
@@ -243,15 +247,15 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
           />
         </div>
 
-        {/* Communication Goals */}
+        {/* Business Growth Goals */}
         <div className="form-field">
           <label htmlFor="goals" className="form-label">
-            What are your communication goals?
+            How can Aluma best assist you with your business growth?
           </label>
           <textarea
             id="goals"
             name="goals"
-            placeholder="Tell us about your communication goals, challenges, or what you'd like to achieve..."
+            placeholder="Tell us about your business challenges, goals, or how you'd like Aluma to help you grow..."
             value={formData.goals}
             onChange={handleFieldChange}
             rows="4"

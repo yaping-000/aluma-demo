@@ -5,7 +5,12 @@ import fs from "fs"
 import path from "path"
 import os from "os"
 import dotenv from "dotenv"
-import { insertUser, insertSession, getUserByEmail } from "./supabase.js"
+import {
+  insertUser,
+  insertSession,
+  getUserByEmail,
+  supabase,
+} from "./supabase.js"
 import OpenAI from "openai"
 import vision from "@google-cloud/vision"
 import mime from "mime-types"
@@ -190,14 +195,66 @@ app.post("/onboarding", async (req, res) => {
   }
 })
 
+// Endpoint to update beta waitlist consent
+app.post("/beta-consent", async (req, res) => {
+  const { email, consent } = req.body
+
+  if (!email || consent === undefined) {
+    return res.status(400).json({ error: "Email and consent are required" })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ beta_waitlist_consent: consent })
+      .eq("email", email)
+      .select()
+
+    if (error) {
+      console.error("Error updating beta consent:", error)
+      return res.status(500).json({ error: "Failed to update consent" })
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ error: "User not found" })
+    }
+
+    res.json({
+      success: true,
+      message: consent
+        ? "Added to beta waitlist!"
+        : "Removed from beta waitlist",
+      user: data[0],
+    })
+  } catch (error) {
+    console.error("Beta consent error:", error)
+    res.status(500).json({ error: "Failed to update beta consent" })
+  }
+})
+
 app.post("/generate", async (req, res) => {
-  const { content, formats, userContext, userEmail } = req.body
+  const { content, formats, userContext, userEmail, userId } = req.body
+
+  console.log("Generate endpoint called with:", {
+    content: content?.substring(0, 100),
+    formats,
+    userContext: !!userContext,
+    userEmail,
+    userId,
+  })
 
   if (!content || !formats || !Array.isArray(formats) || formats.length === 0) {
+    console.log("Invalid request data:", {
+      content: !!content,
+      formats,
+      isArray: Array.isArray(formats),
+      length: formats?.length,
+    })
     return res.status(400).json({ error: "Content and formats are required" })
   }
 
   if (!openai) {
+    console.log("OpenAI not configured")
     return res.status(500).json({ error: "OPENAI_API_KEY not configured" })
   }
 
@@ -360,6 +417,30 @@ Client Follow-up Email:`
       })
 
       generatedContent[format] = completion.choices[0].message.content.trim()
+    }
+
+    // Save session data for content generation (only if userId is provided)
+    if (userId) {
+      try {
+        await insertSession({
+          userId: userId,
+          filename: `generated-content-${Date.now()}`,
+          fileType: "text/generated",
+          fileSize: JSON.stringify(generatedContent).length,
+          extractedText: content, // Store the original content that was used for generation
+        })
+        console.log("Session data saved for content generation")
+      } catch (sessionError) {
+        console.error(
+          "Failed to save session data for generation:",
+          sessionError
+        )
+        // Don't fail the generation if session saving fails
+      }
+    } else {
+      console.log(
+        "No userId provided, skipping session tracking for generation"
+      )
     }
 
     res.json({ content: generatedContent })

@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
     years_of_experience INTEGER, -- Optional field
     consent BOOLEAN DEFAULT true,
     additional_context TEXT, -- Optional field for user notes
+    form_source TEXT DEFAULT 'demo', -- 'demo' or 'contact' to distinguish form source
+    beta_waitlist_consent BOOLEAN DEFAULT false, -- User consent for beta waitlist
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
