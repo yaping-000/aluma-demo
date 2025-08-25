@@ -10,9 +10,11 @@ const Demo = () => {
     name: "",
     email: "",
     company: "",
-    role: "",
-    industry: "",
+    isCareerCoach: "",
+    coachingNiche: "",
+    profession: "",
     goals: "",
+    emailContact: "Yes",
   })
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -21,6 +23,10 @@ const Demo = () => {
   const [generatedContent, setGeneratedContent] = useState({})
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedFormats, setSelectedFormats] = useState([])
+  const [userId, setUserId] = useState(null)
+  const [contentCache, setContentCache] = useState({})
+  const [lastGeneratedKey, setLastGeneratedKey] = useState("")
+  const [isFromCache, setIsFromCache] = useState(false)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -36,27 +42,56 @@ const Demo = () => {
     }
   }
 
-  const handleUpload = async () => {
-    if (!file) return
+  const handleUpload = async (uploadFile = null) => {
+    const fileToUpload = uploadFile || file
+    if (!fileToUpload) {
+      console.log("No file to upload")
+      return
+    }
 
+    console.log(
+      "Starting upload for file:",
+      fileToUpload.name,
+      fileToUpload.type,
+      fileToUpload.size
+    )
     setIsUploading(true)
     setUploadProgress(0)
 
     const formDataToSend = new FormData()
-    formDataToSend.append("file", file)
+    formDataToSend.append("file", fileToUpload)
+    if (userId) {
+      formDataToSend.append("userId", userId)
+    }
 
     try {
+      // Simulate progress for file upload and processing
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return 90
+          }
+          return prev + 10
+        })
+      }, 200)
+
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formDataToSend,
       })
 
-      if (!response.ok) throw new Error("Upload failed")
+      clearInterval(progressInterval)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Upload failed:", response.status, errorText)
+        throw new Error("Upload failed")
+      }
 
       const data = await response.json()
       setExtractedText(data.text)
       setUploadProgress(100)
-      setStep(3)
     } catch (error) {
       console.error("Upload error:", error)
       alert("Upload failed. Please try again.")
@@ -65,9 +100,29 @@ const Demo = () => {
     }
   }
 
+  // Generate a cache key based on content and selected formats
+  const generateCacheKey = (content, formats) => {
+    const sortedFormats = [...formats].sort()
+    return `${content.substring(0, 100)}_${sortedFormats.join("_")}`
+  }
+
   const handleGenerate = async () => {
     if (!extractedText || selectedFormats.length === 0) return
 
+    const cacheKey = generateCacheKey(extractedText, selectedFormats)
+
+    // Check if we have cached content for this combination
+    if (contentCache[cacheKey]) {
+      console.log("Using cached content for:", cacheKey)
+      setGeneratedContent(contentCache[cacheKey])
+      setLastGeneratedKey(cacheKey)
+      setIsFromCache(true)
+      setStep(4)
+      return
+    }
+
+    // Immediately go to results page with loading state
+    setStep(4)
     setIsGenerating(true)
 
     try {
@@ -84,11 +139,20 @@ const Demo = () => {
       if (!response.ok) throw new Error("Generation failed")
 
       const data = await response.json()
+
+      // Cache the generated content
+      setContentCache((prev) => ({
+        ...prev,
+        [cacheKey]: data.content,
+      }))
+      setLastGeneratedKey(cacheKey)
       setGeneratedContent(data.content)
-      setStep(4)
+      setIsFromCache(false)
     } catch (error) {
       console.error("Generation error:", error)
       alert("Content generation failed. Please try again.")
+      // Go back to content generation step on error
+      setStep(3)
     } finally {
       setIsGenerating(false)
     }
@@ -100,14 +164,20 @@ const Demo = () => {
       name: "",
       email: "",
       company: "",
-      role: "",
-      industry: "",
+      isCareerCoach: "",
+      coachingNiche: "",
+      profession: "",
       goals: "",
+      emailContact: "Yes",
     })
     setFile(null)
     setExtractedText("")
     setGeneratedContent({})
     setSelectedFormats([])
+    setUserId(null)
+    setContentCache({})
+    setLastGeneratedKey("")
+    setIsFromCache(false)
   }
 
   const handleUploadAnother = () => {
@@ -116,6 +186,8 @@ const Demo = () => {
     setExtractedText("")
     setGeneratedContent({})
     setSelectedFormats([])
+    // Keep userId and cache for session tracking
+    // Cache persists for the same user session
   }
 
   return (
@@ -126,10 +198,36 @@ const Demo = () => {
       </div>
 
       <div className="demo-progress">
-        <div className={`step ${step >= 1 ? "active" : ""}`}>1. Setup</div>
-        <div className={`step ${step >= 2 ? "active" : ""}`}>2. Upload</div>
-        <div className={`step ${step >= 3 ? "active" : ""}`}>3. Generate</div>
-        <div className={`step ${step >= 4 ? "active" : ""}`}>4. Results</div>
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{ width: `${(step / 4) * 100}%` }}
+          ></div>
+        </div>
+        <div className="progress-steps">
+          <div
+            className={`step ${step >= 1 ? "active" : ""} ${
+              step > 1 ? "completed" : ""
+            }`}
+          >
+            1. Setup
+          </div>
+          <div
+            className={`step ${step >= 2 ? "active" : ""} ${
+              step > 2 ? "completed" : ""
+            }`}
+          >
+            2. Upload
+          </div>
+          <div
+            className={`step ${step >= 3 ? "active" : ""} ${
+              step > 3 ? "completed" : ""
+            }`}
+          >
+            3. Generate
+          </div>
+          <div className={`step ${step >= 4 ? "active" : ""}`}>4. Results</div>
+        </div>
       </div>
 
       {step === 1 && (
@@ -137,6 +235,7 @@ const Demo = () => {
           formData={formData}
           handleInputChange={handleInputChange}
           onNext={() => setStep(2)}
+          setUserId={setUserId}
         />
       )}
 
@@ -148,6 +247,10 @@ const Demo = () => {
           isUploading={isUploading}
           uploadProgress={uploadProgress}
           onBack={() => setStep(1)}
+          onNext={() => setStep(3)}
+          extractedText={extractedText}
+          setExtractedText={setExtractedText}
+          userId={userId}
         />
       )}
 
@@ -159,6 +262,8 @@ const Demo = () => {
           handleGenerate={handleGenerate}
           isGenerating={isGenerating}
           onBack={() => setStep(2)}
+          contentCache={contentCache}
+          generateCacheKey={generateCacheKey}
         />
       )}
 
@@ -167,6 +272,10 @@ const Demo = () => {
           generatedContent={generatedContent}
           onStartOver={handleStartOver}
           onUploadAnother={handleUploadAnother}
+          onBack={() => setStep(3)}
+          isGenerating={isGenerating}
+          isFromCache={isFromCache}
+          formData={formData}
         />
       )}
     </div>

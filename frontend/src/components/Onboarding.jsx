@@ -1,59 +1,292 @@
-import React from "react"
+import React, { useState } from "react"
 
-const Onboarding = ({ formData, handleInputChange, onNext }) => {
+const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
+  const [errors, setErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const validateForm = () => {
+    const newErrors = {}
+
+    // Required fields
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required"
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.isCareerCoach) {
+      newErrors.isCareerCoach = "Please select whether you are a career coach"
+    }
+
+    // Conditional required fields
+    if (formData.isCareerCoach === "Yes" && !formData.coachingNiche) {
+      newErrors.coachingNiche = "Please select your coaching niche"
+    }
+
+    if (formData.isCareerCoach === "No" && !formData.profession) {
+      newErrors.profession = "Please specify your profession"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
+
+    try {
+      // Save user data to Supabase
+      const response = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to save user data")
+      }
+
+      const data = await response.json()
+      console.log("User data saved:", data)
+
+      // Save userId for session tracking
+      if (data.userId) {
+        setUserId(data.userId)
+      }
+
+      // Continue to next step
+      onNext()
+    } catch (error) {
+      console.error("Error saving user data:", error)
+      // Continue to demo even if saving fails
+      onNext()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target
+    handleInputChange(e)
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }))
+    }
+  }
+
   return (
     <div className="demo-step">
       <h2>Tell us about yourself</h2>
-      <div className="form-grid">
-        <input
-          type="text"
-          name="name"
-          placeholder="Your name"
-          value={formData.name}
-          onChange={handleInputChange}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email address"
-          value={formData.email}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="company"
-          placeholder="Company/Organization"
-          value={formData.company}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="role"
-          placeholder="Your role"
-          value={formData.role}
-          onChange={handleInputChange}
-        />
-        <input
-          type="text"
-          name="industry"
-          placeholder="Industry"
-          value={formData.industry}
-          onChange={handleInputChange}
-        />
-        <textarea
-          name="goals"
-          placeholder="What are your communication goals?"
-          value={formData.goals}
-          onChange={handleInputChange}
-        />
+      <p className="step-description">
+        This helps us personalize your content generation experience
+      </p>
+
+      <div className="form-container">
+        {/* Name - Required */}
+        <div className="form-field">
+          <label htmlFor="name" className="form-label">
+            Full Name <span className="required">*</span>
+          </label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            placeholder="Enter your full name"
+            value={formData.name}
+            onChange={handleFieldChange}
+            className={errors.name ? "error" : ""}
+          />
+          {errors.name && <span className="error-message">{errors.name}</span>}
+        </div>
+
+        {/* Email - Required */}
+        <div className="form-field">
+          <label htmlFor="email" className="form-label">
+            Email Address <span className="required">*</span>
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="Enter your email address"
+            value={formData.email}
+            onChange={handleFieldChange}
+            className={errors.email ? "error" : ""}
+          />
+          {errors.email && (
+            <span className="error-message">{errors.email}</span>
+          )}
+        </div>
+
+        {/* Company */}
+        <div className="form-field">
+          <label htmlFor="company" className="form-label">
+            Company/Organization
+          </label>
+          <input
+            id="company"
+            type="text"
+            name="company"
+            placeholder="Enter your company or organization"
+            value={formData.company}
+            onChange={handleFieldChange}
+          />
+        </div>
+
+        {/* Career Coach Question - Required */}
+        <div className="form-field">
+          <label className="form-label">
+            Are you a career coach? <span className="required">*</span>
+          </label>
+          <div className="radio-group">
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="isCareerCoach"
+                value="Yes"
+                checked={formData.isCareerCoach === "Yes"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">Yes, I am a career coach</span>
+            </label>
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="isCareerCoach"
+                value="No"
+                checked={formData.isCareerCoach === "No"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">No, I'm not a career coach</span>
+            </label>
+          </div>
+          {errors.isCareerCoach && (
+            <span className="error-message">{errors.isCareerCoach}</span>
+          )}
+        </div>
+
+        {/* Conditional: Coaching Niche (if career coach) */}
+        {formData.isCareerCoach === "Yes" && (
+          <div className="form-field">
+            <label htmlFor="coachingNiche" className="form-label">
+              What's your coaching niche? <span className="required">*</span>
+            </label>
+            <select
+              id="coachingNiche"
+              name="coachingNiche"
+              value={formData.coachingNiche}
+              onChange={handleFieldChange}
+              className={errors.coachingNiche ? "error" : ""}
+            >
+              <option value="">Select your coaching niche</option>
+              <option value="Early Career">Early Career</option>
+              <option value="Executive">Executive</option>
+              <option value="Career Transition">Career Transition</option>
+              <option value="Resume Writing">Resume Writing</option>
+              <option value="Interview Preparation">
+                Interview Preparation
+              </option>
+              <option value="Leadership Development">
+                Leadership Development
+              </option>
+              <option value="Personal Branding">Personal Branding</option>
+              <option value="Other">Other</option>
+            </select>
+            {errors.coachingNiche && (
+              <span className="error-message">{errors.coachingNiche}</span>
+            )}
+          </div>
+        )}
+
+        {/* Conditional: Profession (if not career coach) */}
+        {formData.isCareerCoach === "No" && (
+          <div className="form-field">
+            <label htmlFor="profession" className="form-label">
+              What's your profession? <span className="required">*</span>
+            </label>
+            <input
+              id="profession"
+              type="text"
+              name="profession"
+              placeholder="e.g., Marketing Manager, Software Engineer, Consultant"
+              value={formData.profession}
+              onChange={handleFieldChange}
+              className={errors.profession ? "error" : ""}
+            />
+            {errors.profession && (
+              <span className="error-message">{errors.profession}</span>
+            )}
+          </div>
+        )}
+
+        {/* Communication Goals */}
+        <div className="form-field">
+          <label htmlFor="goals" className="form-label">
+            What are your communication goals?
+          </label>
+          <textarea
+            id="goals"
+            name="goals"
+            placeholder="Tell us about your communication goals, challenges, or what you'd like to achieve..."
+            value={formData.goals}
+            onChange={handleFieldChange}
+            rows="4"
+          />
+        </div>
+
+        {/* Email Contact Permission */}
+        <div className="form-field">
+          <label className="form-label">
+            Can Aluma contact you via email and send you additional content?
+          </label>
+          <div className="radio-group">
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="emailContact"
+                value="Yes"
+                checked={formData.emailContact === "Yes"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">
+                Yes, I'd like to receive updates and content
+              </span>
+            </label>
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="emailContact"
+                value="No"
+                checked={formData.emailContact === "No"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">
+                No, I prefer not to receive emails
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="form-actions">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="primary"
+          >
+            {isSubmitting ? "Saving..." : "Continue to Demo"}
+          </button>
+        </div>
       </div>
-      <button
-        onClick={onNext}
-        disabled={!formData.name || !formData.email}
-        className="primary"
-      >
-        Continue
-      </button>
     </div>
   )
 }

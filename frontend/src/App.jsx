@@ -14,11 +14,20 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <div className="hero">
-        <h1>Welcome to Aluma</h1>
-        <p>Transform your content into professional communications</p>
-        <Link to="/demo" className="cta-button">
-          Try the Demo
-        </Link>
+        <div className="hero-content">
+          <h1>Welcome to Aluma</h1>
+          <p>Transform your content into professional communications</p>
+          <Link to="/demo" className="cta-button">
+            Try the Demo
+          </Link>
+        </div>
+        <div className="hero-image">
+          <img
+            src="/hero-image.png"
+            alt="Diverse professionals representing different careers"
+            className="hero-img"
+          />
+        </div>
       </div>
       <div className="features">
         <div className="feature">
@@ -44,7 +53,9 @@ const Navigation = () => {
 
   return (
     <nav className="app-nav">
-      <div className="nav-brand">Aluma</div>
+      <Link to="/" className="nav-brand">
+        Aluma
+      </Link>
       <div className="nav-links">
         <Link to="/" className={location.pathname === "/" ? "active" : ""}>
           Home

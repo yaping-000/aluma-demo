@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://your-railway-backend.railway.app/$1"
+      "destination": "https://aluma-backend-production.up.railway.app/$1"
     },
     {
       "source": "/demo",

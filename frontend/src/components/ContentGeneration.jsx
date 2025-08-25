@@ -7,6 +7,8 @@ const ContentGeneration = ({
   handleGenerate,
   isGenerating,
   onBack,
+  contentCache,
+  generateCacheKey,
 }) => {
   const formatOptions = [
     { value: "linkedin", label: "LinkedIn Post", icon: "💼" },
@@ -62,19 +64,26 @@ const ContentGeneration = ({
         <button onClick={onBack}>Back</button>
         <button
           onClick={handleGenerate}
-          disabled={selectedFormats.length === 0 || isGenerating}
+          disabled={selectedFormats.length === 0}
           className="primary"
         >
-          {isGenerating ? "Generating..." : "Generate Content"}
+          {contentCache &&
+          generateCacheKey &&
+          selectedFormats.length > 0 &&
+          contentCache[generateCacheKey(extractedText, selectedFormats)]
+            ? "Regenerate Content"
+            : "Generate Content"}
         </button>
       </div>
 
-      {isGenerating && (
-        <div className="generation-status">
-          <div className="loading-spinner"></div>
-          <p>AI is creating your content...</p>
-        </div>
-      )}
+      {contentCache &&
+        generateCacheKey &&
+        selectedFormats.length > 0 &&
+        contentCache[generateCacheKey(extractedText, selectedFormats)] && (
+          <div className="cache-notice">
+            <p>💡 Cached content available - will load instantly!</p>
+          </div>
+        )}
     </div>
   )
 }
