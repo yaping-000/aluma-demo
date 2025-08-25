@@ -49,6 +49,11 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
         },
         body: JSON.stringify({
           ...formData,
+          betaWaitlistConsent:
+            formData.betaWaitlistConsent === "Yes" ||
+            formData.betaWaitlistConsent === true,
+          emailContact:
+            formData.emailContact === "Yes" || formData.emailContact === true,
           formSource: "demo",
         }),
       })
@@ -290,6 +295,40 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
               />
               <span className="radio-label">
                 No, I prefer not to receive emails
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Beta Waitlist Consent */}
+        <div className="form-field">
+          <label className="form-label">
+            Would you like to join our beta waitlist to help shape the future of
+            Aluma?
+          </label>
+          <div className="radio-group">
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="betaWaitlistConsent"
+                value="Yes"
+                checked={formData.betaWaitlistConsent === "Yes"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">
+                Yes, I'd like to join the beta waitlist and provide feedback
+              </span>
+            </label>
+            <label className="radio-option">
+              <input
+                type="radio"
+                name="betaWaitlistConsent"
+                value="No"
+                checked={formData.betaWaitlistConsent === "No"}
+                onChange={handleFieldChange}
+              />
+              <span className="radio-label">
+                No, I prefer not to join the beta waitlist
               </span>
             </label>
           </div>

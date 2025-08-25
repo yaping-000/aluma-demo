@@ -102,7 +102,7 @@ const Results = ({
       {isGenerating ? (
         <div className="generation-status">
           <div className="loading-spinner"></div>
-          <p>Aluma is creating your content...</p>
+          <p>Aluma is creating your content in your authentic voice...</p>
           <p className="generation-hint">This may take a few moments</p>
         </div>
       ) : (
@@ -118,8 +118,8 @@ const Results = ({
                 )}
               </p>
 
-              {/* Beta Waitlist Section */}
-              {formData.email && (
+              {/* Beta Waitlist Section - Only show if user initially selected "No" */}
+              {formData.email && formData.betaWaitlistConsent === "No" && (
                 <div className="beta-waitlist-section">
                   <p className="beta-prompt">
                     Want to shape the future of Aluma? Drop your feedback and

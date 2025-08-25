@@ -211,10 +211,7 @@ const ContactUs = () => {
               </div>
               <div className="option-card secondary">
                 <h3>Schedule a call</h3>
-                <p>
-                  Book a quick intro call to see how Aluma can help—no hard
-                  sell.
-                </p>
+                <p>Book a quick intro call to see how Aluma can help.</p>
                 <button
                   className="schedule-button"
                   data-cal-namespace="aluma-intros"
@@ -248,8 +245,7 @@ const ContactUs = () => {
               <div className="form-container">
                 <h2>Contact Form</h2>
                 <p className="form-description">
-                  Tell us about yourself and your needs. We'll get back to you
-                  with personalized information.
+                  Tell us about yourself and your needs. Join our beta waitlist!
                 </p>
 
                 {/* Name - Required */}

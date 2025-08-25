@@ -100,7 +100,7 @@ const HeroSection = () => {
 
               <motion.div variants={buttonVariants} whileHover="hover">
                 <Link to="/contact" className="cta-secondary">
-                  Contact Us – Partner with Us
+                  Contact Us – Join the Beta Waitlist
                 </Link>
               </motion.div>
             </motion.div>

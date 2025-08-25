@@ -16,6 +16,7 @@ const Demo = () => {
     idealClient: "",
     goals: "",
     emailContact: "Yes",
+    betaWaitlistConsent: "Yes",
   })
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
