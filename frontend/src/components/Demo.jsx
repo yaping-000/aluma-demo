@@ -13,6 +13,7 @@ const Demo = () => {
     isCareerCoach: "",
     coachingNiche: "",
     profession: "",
+    idealClient: "",
     goals: "",
     emailContact: "Yes",
   })

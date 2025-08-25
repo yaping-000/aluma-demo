@@ -59,10 +59,12 @@ export async function insertUser(userData) {
       name: userData.name,
       email: userData.email,
       business_name: userData.company || null,
-      is_career_coach: userData.isCareerCoach === "Yes",
+      is_career_coach:
+        userData.isCareerCoach === "Yes" || userData.isCareerCoach === true,
       coaching_expertise: userData.coachingNiche || null,
       profession: userData.profession || null,
-      consent: userData.emailContact === "Yes",
+      ideal_client: userData.idealClient || null,
+      consent: userData.emailContact === "Yes" || userData.consent === true,
       additional_context: userData.goals || null,
     }
 
@@ -112,6 +114,36 @@ export async function getUserByEmail(email) {
     return data
   } catch (error) {
     console.error("Failed to fetch user:", error)
+    return null
+  }
+}
+
+/**
+ * Get user information by ID for session management
+ * @param {string} id - User's ID
+ * @returns {Object} - User data for session context
+ */
+export async function getUserById(id) {
+  if (!supabase) {
+    console.warn("⚠️ Supabase not available. Returning null user.")
+    return null
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", id)
+      .single()
+
+    if (error) {
+      console.error("Error fetching user by ID:", error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error("Failed to fetch user by ID:", error)
     return null
   }
 }

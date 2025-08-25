@@ -228,6 +228,21 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
           </div>
         )}
 
+        {/* Ideal Client/Audience */}
+        <div className="form-field">
+          <label htmlFor="idealClient" className="form-label">
+            Who is your ideal client or audience?
+          </label>
+          <textarea
+            id="idealClient"
+            name="idealClient"
+            placeholder="Describe your ideal client or target audience (e.g., 'Mid-career professionals looking to transition into tech', 'Recent graduates seeking their first job', 'Executives wanting to improve their leadership presence')"
+            value={formData.idealClient}
+            onChange={handleFieldChange}
+            rows="3"
+          />
+        </div>
+
         {/* Communication Goals */}
         <div className="form-field">
           <label htmlFor="goals" className="form-label">

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_career_coach BOOLEAN NOT NULL,
     coaching_expertise TEXT, -- NULL for non-career coaches
     profession TEXT, -- NULL for career coaches
+    ideal_client TEXT, -- Optional field for ideal client/audience description
     years_of_experience INTEGER, -- Optional field
     consent BOOLEAN DEFAULT true,
     additional_context TEXT, -- Optional field for user notes

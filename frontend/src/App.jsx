@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom"
 import Demo from "./components/Demo"
+import Auth from "./components/Auth"
 import "./styles.css"
 
 // Landing page component
@@ -48,7 +49,7 @@ const LandingPage = () => {
 }
 
 // Navigation component
-const Navigation = () => {
+const Navigation = ({ user, onAuthStateChange }) => {
   const location = useLocation()
 
   return (
@@ -66,6 +67,17 @@ const Navigation = () => {
         >
           Demo
         </Link>
+        {user && (
+          <Link
+            to="/dashboard"
+            className={location.pathname === "/dashboard" ? "active" : ""}
+          >
+            Dashboard
+          </Link>
+        )}
+      </div>
+      <div className="nav-auth">
+        <Auth onAuthStateChange={onAuthStateChange} />
       </div>
     </nav>
   )
@@ -73,14 +85,24 @@ const Navigation = () => {
 
 // Main App component
 const App = () => {
+  const [user, setUser] = useState(null)
+
+  const handleAuthStateChange = (newUser) => {
+    setUser(newUser)
+  }
+
   return (
     <Router>
       <div className="app">
-        <Navigation />
+        <Navigation user={user} onAuthStateChange={handleAuthStateChange} />
         <main className="app-main">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/demo" element={<Demo />} />
+            <Route
+              path="/dashboard"
+              element={<div>Dashboard Coming Soon</div>}
+            />
           </Routes>
         </main>
       </div>
