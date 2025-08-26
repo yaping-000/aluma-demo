@@ -129,7 +129,8 @@ const FileUpload = ({
         formData.append("userId", userId)
       }
 
-      const response = await fetch(`${getApiBaseUrl()}/upload`, {
+      const baseUrl = getApiBaseUrl()
+      const response = await fetch(`${baseUrl}/upload`, {
         method: "POST",
         body: formData,
       })

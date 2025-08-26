@@ -125,8 +125,14 @@ curl -X POST https://your-railway-url.railway.app/onboarding \
    - Not: `https://your-app.railway.app/upload`
 
 3. **Cache Issues**:
+
    - Clear browser cache
    - Hard refresh (Ctrl+F5 / Cmd+Shift+R)
+
+4. **Double Slash in URLs**:
+   - Check browser console for URLs like `https://domain.com//endpoint`
+   - The `apiCall` utility should prevent this automatically
+   - Ensure `VITE_API_BASE_URL` doesn't end with a slash
 
 ## 📚 **Code Changes Summary**
 
@@ -150,6 +156,8 @@ const data = await apiCall("/onboarding", {
   body: JSON.stringify(data),
 })
 ```
+
+**Note**: The `apiCall` utility automatically handles URL formatting to prevent double slashes.
 
 ## 🎯 **Success Indicators**
 

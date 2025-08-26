@@ -79,7 +79,8 @@ const Demo = () => {
         })
       }, 200)
 
-      const response = await fetch(`${getApiBaseUrl()}/upload`, {
+      const baseUrl = getApiBaseUrl()
+      const response = await fetch(`${baseUrl}/upload`, {
         method: "POST",
         body: formDataToSend,
       })
@@ -129,7 +130,8 @@ const Demo = () => {
     setIsGenerating(true)
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/generate`, {
+      const baseUrl = getApiBaseUrl()
+      const response = await fetch(`${baseUrl}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

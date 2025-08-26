@@ -70,7 +70,8 @@ const Results = ({
 
     setIsUpdatingConsent(true)
     try {
-      const response = await fetch(`${getApiBaseUrl()}/beta-consent`, {
+      const baseUrl = getApiBaseUrl()
+      const response = await fetch(`${baseUrl}/beta-consent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
