@@ -1,23 +1,13 @@
 /* Contact Us Page Styles */
 .book-call-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background: white;
   padding: 2rem 0;
   position: relative;
   overflow: hidden;
 }
 
-.book-call-page::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.3;
-  z-index: 1;
-}
+/* Removed background pattern overlay for clean white background */
 
 .book-call-container {
   max-width: 80rem; /* max-w-5xl equivalent */

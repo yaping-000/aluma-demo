@@ -71,6 +71,7 @@ const LandingPage = () => {
 const Navigation = ({ user, onAuthStateChange }) => {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const isHomePage = location.pathname === "/"
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -81,7 +82,7 @@ const Navigation = ({ user, onAuthStateChange }) => {
   }
 
   return (
-    <nav className="app-nav">
+    <nav className={`app-nav ${isHomePage ? "nav-hero" : "nav-default"}`}>
       <Link to="/" className="nav-brand" onClick={closeMobileMenu}>
         Aluma
       </Link>
@@ -157,6 +158,29 @@ const Navigation = ({ user, onAuthStateChange }) => {
   )
 }
 
+// App Content component
+const AppContent = ({ user, onAuthStateChange }) => {
+  const location = useLocation()
+  const isHomePage = location.pathname === "/"
+
+  return (
+    <div className="app">
+      <Navigation user={user} onAuthStateChange={onAuthStateChange} />
+      <main className={`app-main ${isHomePage ? "home-page" : "other-page"}`}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/demo" element={<Demo />} />
+
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/dashboard" element={<div>Dashboard Coming Soon</div>} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}
+
 // Main App component
 const App = () => {
   const [user, setUser] = useState(null)
@@ -167,23 +191,7 @@ const App = () => {
 
   return (
     <Router>
-      <div className="app">
-        <Navigation user={user} onAuthStateChange={handleAuthStateChange} />
-        <main className="app-main">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/demo" element={<Demo />} />
-
-            <Route path="/contact" element={<ContactUs />} />
-            <Route
-              path="/dashboard"
-              element={<div>Dashboard Coming Soon</div>}
-            />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-          </Routes>
-        </main>
-      </div>
+      <AppContent user={user} onAuthStateChange={handleAuthStateChange} />
     </Router>
   )
 }

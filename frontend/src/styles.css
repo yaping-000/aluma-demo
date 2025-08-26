@@ -5,6 +5,14 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 /* Remove underlines from all links */
 a {
   text-decoration: none;
@@ -15,7 +23,7 @@ body {
     sans-serif;
   line-height: 1.6;
   color: #333;
-  background-color: #f8fafc;
+  background-color: white;
 }
 
 /* App layout */
@@ -27,30 +35,57 @@ body {
 
 /* Navigation */
 .app-nav {
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 2rem;
+  border-bottom: none;
+  padding: 1rem 4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
+  position: absolute;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
+  box-shadow: none;
+}
+
+/* Navigation on hero section (home page) */
+.nav-hero {
+  background: transparent;
+}
+
+/* Navigation on other pages */
+.nav-default {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .nav-brand {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #7c3aed;
   font-family: "Pacifico", cursive;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
 }
 
+.nav-hero .nav-brand {
+  color: white;
+}
+
+.nav-hero .nav-brand:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-default .nav-brand {
+  color: #1a1f36;
+}
+
+.nav-default .nav-brand:hover {
+  color: #635bff;
+}
+
 .nav-brand:hover {
-  color: #8b5cf6;
   transform: scale(1.05);
 }
 
@@ -62,20 +97,37 @@ body {
 
 .nav-links a {
   text-decoration: none;
-  color: #64748b;
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   transition: all 0.2s;
 }
 
-.nav-links a:hover {
-  background-color: #f1f5f9;
-  color: #374151;
+.nav-hero .nav-links a {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.nav-links a.active {
-  background-color: #7c3aed;
+.nav-hero .nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-hero .nav-links a.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.nav-default .nav-links a {
+  color: #6b7280;
+}
+
+.nav-default .nav-links a:hover {
+  background-color: #f3f4f6;
+  color: #1a1f36;
+}
+
+.nav-default .nav-links a.active {
+  background-color: #635bff;
   color: white;
 }
 
@@ -96,9 +148,20 @@ body {
 .hamburger {
   width: 24px;
   height: 2px;
-  background-color: #374151;
   transition: all 0.3s ease;
   position: relative;
+}
+
+.nav-hero .hamburger,
+.nav-hero .hamburger::before,
+.nav-hero .hamburger::after {
+  background-color: white;
+}
+
+.nav-default .hamburger,
+.nav-default .hamburger::before,
+.nav-default .hamburger::after {
+  background-color: #1a1f36;
 }
 
 .hamburger::before,
@@ -107,7 +170,6 @@ body {
   position: absolute;
   width: 24px;
   height: 2px;
-  background-color: #374151;
   transition: all 0.3s ease;
 }
 
@@ -164,6 +226,16 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+}
+
+/* Home page - no padding for hero section */
+.app-main.home-page {
+  padding: 0;
+}
+
+/* Other pages - add top padding to avoid navigation overlap */
+.app-main.other-page {
+  padding-top: 80px;
 }
 
 /* Landing page */
@@ -1053,6 +1125,11 @@ body {
   transform: none;
 }
 
+/* Hidden utility class */
+.hidden {
+  display: none !important;
+}
+
 /* Auth Success Page */
 .auth-success {
   display: flex;
@@ -1082,8 +1159,18 @@ body {
 /* Responsive design */
 @media (max-width: 768px) {
   .app-nav {
-    padding: 1rem;
-    position: relative;
+    padding: 1rem 2rem;
+    position: absolute;
+  }
+
+  .nav-hero {
+    background: transparent;
+  }
+
+  .nav-default {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   .mobile-menu-btn {
@@ -1095,11 +1182,12 @@ body {
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
     flex-direction: column;
     gap: 0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     transform: translateY(-100%);
     opacity: 0;
     visibility: hidden;
@@ -1116,9 +1204,10 @@ body {
   .nav-links a {
     padding: 1rem 2rem;
     border-radius: 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     text-align: left;
     width: 100%;
+    color: white;
   }
 
   .nav-links a:last-child {
@@ -1800,7 +1889,7 @@ body {
 
 /* Footer Styles */
 .landing-footer {
-  background-color: #f8fafc;
+  background-color: white;
   border-top: 1px solid #e5e7eb;
   padding: 2rem 0;
   margin-top: 4rem;

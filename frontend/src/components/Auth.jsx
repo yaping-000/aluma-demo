@@ -137,7 +137,7 @@ const Auth = ({ onAuthStateChange }) => {
 
   return (
     <div className="auth-buttons">
-      <div className="auth-coming-soon">
+      <div className="auth-coming-soon hidden">
         <span className="coming-soon-text">Sign In</span>
         <span className="coming-soon-badge">Coming Soon</span>
       </div>
