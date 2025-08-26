@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { getCalApi } from "@calcom/embed-react"
+import { apiCall } from "../lib/api"
 import "./ContactUs.css"
 
 const ContactUs = () => {
@@ -95,11 +96,8 @@ const ContactUs = () => {
 
     try {
       // Save user data to Supabase
-      const response = await fetch("http://localhost:3000/onboarding", {
+      const data = await apiCall("/onboarding", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           ...formData,
           betaWaitlistConsent:
@@ -110,12 +108,6 @@ const ContactUs = () => {
           formSource: "contact",
         }),
       })
-
-      if (!response.ok) {
-        throw new Error("Failed to save user data")
-      }
-
-      const data = await response.json()
       console.log("User data saved:", data)
 
       // Show success state

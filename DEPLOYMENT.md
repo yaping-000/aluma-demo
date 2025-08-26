@@ -86,7 +86,7 @@ PORT=3000
 In Vercel dashboard, add:
 
 ```env
-VITE_API_BASE_URL=https://your-railway-url.railway.app/upload
+VITE_API_BASE_URL=https://your-railway-url.railway.app
 ```
 
 ### 2.4 **Get Vercel URL**

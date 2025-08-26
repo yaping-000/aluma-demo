@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { getApiBaseUrl } from "../lib/api"
 
 const Results = ({
   generatedContent,
@@ -69,7 +70,7 @@ const Results = ({
 
     setIsUpdatingConsent(true)
     try {
-      const response = await fetch("http://localhost:3000/beta-consent", {
+      const response = await fetch(`${getApiBaseUrl()}/beta-consent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

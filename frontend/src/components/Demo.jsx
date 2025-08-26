@@ -3,6 +3,7 @@ import Onboarding from "./Onboarding"
 import FileUpload from "./FileUpload"
 import ContentGeneration from "./ContentGeneration"
 import Results from "./Results"
+import { getApiBaseUrl } from "../lib/api"
 
 const Demo = () => {
   const [step, setStep] = useState(1)
@@ -78,7 +79,7 @@ const Demo = () => {
         })
       }, 200)
 
-      const response = await fetch("http://localhost:3000/upload", {
+      const response = await fetch(`${getApiBaseUrl()}/upload`, {
         method: "POST",
         body: formDataToSend,
       })
@@ -128,7 +129,7 @@ const Demo = () => {
     setIsGenerating(true)
 
     try {
-      const response = await fetch("http://localhost:3000/generate", {
+      const response = await fetch(`${getApiBaseUrl()}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

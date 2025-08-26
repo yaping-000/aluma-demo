@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { apiCall } from "../lib/api"
 
 const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
   const [errors, setErrors] = useState({})
@@ -42,11 +43,8 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
 
     try {
       // Save user data to Supabase
-      const response = await fetch("http://localhost:3000/onboarding", {
+      const data = await apiCall("/onboarding", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           ...formData,
           betaWaitlistConsent:
@@ -57,12 +55,6 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
           formSource: "demo",
         }),
       })
-
-      if (!response.ok) {
-        throw new Error("Failed to save user data")
-      }
-
-      const data = await response.json()
       console.log("User data saved:", data)
 
       // Save userId for session tracking

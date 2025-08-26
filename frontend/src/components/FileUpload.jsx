@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { getApiBaseUrl } from "../lib/api"
 
 const FileUpload = ({
   file,
@@ -128,7 +129,7 @@ const FileUpload = ({
         formData.append("userId", userId)
       }
 
-      const response = await fetch("http://localhost:3000/upload", {
+      const response = await fetch(`${getApiBaseUrl()}/upload`, {
         method: "POST",
         body: formData,
       })
