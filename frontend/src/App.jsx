@@ -71,7 +71,19 @@ const LandingPage = () => {
 const Navigation = ({ user, onAuthStateChange }) => {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const isHomePage = location.pathname === "/"
+
+  // Handle scroll detection
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 50)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -82,22 +94,30 @@ const Navigation = ({ user, onAuthStateChange }) => {
   }
 
   return (
-    <nav className={`app-nav ${isHomePage ? "nav-hero" : "nav-default"}`}>
+    <nav
+      className={`app-nav ${isHomePage ? "nav-hero" : "nav-default"} ${
+        isScrolled ? "nav-scrolled" : ""
+      }`}
+    >
       <Link to="/" className="nav-brand" onClick={closeMobileMenu}>
         Aluma
       </Link>
 
-      {/* Mobile menu button */}
+      {/* Mobile menu button - always visible when scrolled */}
       <button
-        className="mobile-menu-btn"
+        className={`mobile-menu-btn ${isScrolled ? "always-visible" : ""}`}
         onClick={toggleMobileMenu}
         aria-label="Toggle mobile menu"
       >
         <span className={`hamburger ${isMobileMenuOpen ? "open" : ""}`}></span>
       </button>
 
-      {/* Desktop navigation */}
-      <div className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""}`}>
+      {/* Desktop navigation - hidden when scrolled on mobile */}
+      <div
+        className={`nav-links ${isMobileMenuOpen ? "mobile-open" : ""} ${
+          isScrolled ? "nav-scrolled" : ""
+        }`}
+      >
         <Link
           to="/"
           className={location.pathname === "/" ? "active" : ""}
