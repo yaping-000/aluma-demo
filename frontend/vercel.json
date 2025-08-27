@@ -8,7 +8,7 @@
       "destination": "https://aluma-demo-production.up.railway.app/$1"
     },
     {
-      "source": "/demo",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ],

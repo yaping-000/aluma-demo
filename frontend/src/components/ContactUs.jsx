@@ -16,7 +16,7 @@ const ContactUs = () => {
     idealClient: "",
     goals: "",
     emailContact: "Yes",
-    betaWaitlistConsent: "No",
+    betaWaitlistConsent: "Yes",
   })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -96,17 +96,20 @@ const ContactUs = () => {
 
     try {
       // Save user data to Supabase
+      const requestBody = {
+        ...formData,
+        betaWaitlistConsent:
+          formData.betaWaitlistConsent === "Yes" ||
+          formData.betaWaitlistConsent === true,
+        emailContact:
+          formData.emailContact === "Yes" || formData.emailContact === true,
+        formSource: "contact",
+      }
+      console.log("Sending contact form data:", requestBody)
+
       const data = await apiCall("/onboarding", {
         method: "POST",
-        body: JSON.stringify({
-          ...formData,
-          betaWaitlistConsent:
-            formData.betaWaitlistConsent === "Yes" ||
-            formData.betaWaitlistConsent === true,
-          emailContact:
-            formData.emailContact === "Yes" || formData.emailContact === true,
-          formSource: "contact",
-        }),
+        body: JSON.stringify(requestBody),
       })
       console.log("User data saved:", data)
 
@@ -498,7 +501,7 @@ const ContactUs = () => {
                         onChange={handleInputChange}
                       />
                       <span className="radio-label">
-                        No, I prefer not to join the beta waitlist
+                        No, I prefer not to join the beta waitlist at this time
                       </span>
                     </label>
                   </div>

@@ -43,17 +43,20 @@ const Onboarding = ({ formData, handleInputChange, onNext, setUserId }) => {
 
     try {
       // Save user data to Supabase
+      const requestBody = {
+        ...formData,
+        betaWaitlistConsent:
+          formData.betaWaitlistConsent === "Yes" ||
+          formData.betaWaitlistConsent === true,
+        emailContact:
+          formData.emailContact === "Yes" || formData.emailContact === true,
+        formSource: "demo",
+      }
+      console.log("Sending onboarding data:", requestBody)
+
       const data = await apiCall("/onboarding", {
         method: "POST",
-        body: JSON.stringify({
-          ...formData,
-          betaWaitlistConsent:
-            formData.betaWaitlistConsent === "Yes" ||
-            formData.betaWaitlistConsent === true,
-          emailContact:
-            formData.emailContact === "Yes" || formData.emailContact === true,
-          formSource: "demo",
-        }),
+        body: JSON.stringify(requestBody),
       })
       console.log("User data saved:", data)
 
