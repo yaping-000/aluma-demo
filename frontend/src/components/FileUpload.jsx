@@ -13,7 +13,7 @@ const FileUpload = ({
   setExtractedText,
   userId,
 }) => {
-  const [inputMethod, setInputMethod] = useState("text") // "file", "text", "audio" (file upload temporarily disabled)
+  const [inputMethod, setInputMethod] = useState("file") // "file", "text", "audio"
   const [textInput, setTextInput] = useState("")
   const [isRecording, setIsRecording] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -157,8 +157,7 @@ const FileUpload = ({
     }
   }
 
-  // Auto-process file when selected - Temporarily disabled for demo
-  /*
+  // Auto-process file when selected
   const handleFileChangeWithAutoProcess = (e) => {
     const selectedFile = e.target.files[0]
     if (selectedFile) {
@@ -182,7 +181,6 @@ const FileUpload = ({
       handleUpload(selectedFile)
     }
   }
-  */
 
   // Check if we can continue to next step
   const canContinue = () => {
@@ -210,26 +208,21 @@ const FileUpload = ({
     <div className="demo-step">
       <h2>Add your content</h2>
       <p className="step-description">
-        Enter your content using text or audio recording
+        Enter your content using audio/video file upload, text input, or audio
+        recording
       </p>
 
       {/* Input Method Selection */}
       <div className="input-method-selector">
         <div className="method-options">
-          {/* File upload temporarily disabled for demo */}
-          {/* To re-enable file upload:
-              1. Uncomment the button below
-              2. Uncomment the file upload section below
-              3. Uncomment the handleFileChangeWithAutoProcess function
-              4. Change default inputMethod back to "file" */}
-          {/* <button
+          <button
             className={`method-option ${
               inputMethod === "file" ? "active" : ""
             }`}
             onClick={() => setInputMethod("file")}
           >
-            📁 Upload File
-          </button> */}
+            🎵 Upload Audio/Video
+          </button>
           <button
             className={`method-option ${
               inputMethod === "text" ? "active" : ""
@@ -249,24 +242,24 @@ const FileUpload = ({
         </div>
       </div>
 
-      {/* File Upload Section - Temporarily disabled for demo */}
-      {/* {inputMethod === "file" && (
+      {/* File Upload Section */}
+      {inputMethod === "file" && (
         <div className="input-section">
           <div className="upload-area">
             <input
               type="file"
-              accept="image/*,audio/*,video/*,.txt,.pdf,.doc,.docx"
+              accept="audio/*,video/*"
               onChange={handleFileChangeWithAutoProcess}
               id="file-upload"
             />
             <label htmlFor="file-upload" className="file-label">
               {file
                 ? file.name
-                : "Choose a file (image, audio, video, or document)"}
+                : "Choose an audio or video file for transcription"}
             </label>
             <p className="upload-hint">
-              Supports images, audio, video, and document files (PDF, DOC, DOCX,
-              TXT). Maximum file size: 100MB.
+              Supports audio and video files for transcription. Maximum file
+              size: 100MB.
             </p>
           </div>
 
@@ -293,7 +286,7 @@ const FileUpload = ({
                 ></div>
               </div>
               <p className="progress-text">
-                Processing file... {uploadProgress}%
+                Transcribing audio/video... {uploadProgress}%
               </p>
             </div>
           )}
@@ -301,13 +294,13 @@ const FileUpload = ({
           {!isUploading && extractedText && inputMethod === "file" && (
             <div className="success-message">
               <p>
-                ✅ File processed successfully! Review the extracted content
-                below.
+                ✅ Audio/Video transcribed successfully! Review the extracted
+                content below.
               </p>
             </div>
           )}
         </div>
-      )} */}
+      )}
 
       {/* Text Input Section */}
       {inputMethod === "text" && (

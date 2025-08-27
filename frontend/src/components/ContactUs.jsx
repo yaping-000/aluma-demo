@@ -16,7 +16,7 @@ const ContactUs = () => {
     idealClient: "",
     goals: "",
     emailContact: "Yes",
-    betaWaitlistConsent: "Yes",
+    betaWaitlistConsent: "No",
   })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -145,6 +145,18 @@ const ContactUs = () => {
     setIsSubmitted(false)
     setSubmitError("")
     setErrors({})
+    setFormData({
+      name: "",
+      email: "",
+      company: "",
+      isCareerCoach: "",
+      coachingNiche: "",
+      profession: "",
+      idealClient: "",
+      goals: "",
+      emailContact: "Yes",
+      betaWaitlistConsent: "No",
+    })
   }
 
   const containerVariants = {

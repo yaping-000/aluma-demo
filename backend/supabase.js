@@ -170,10 +170,12 @@ export async function getUserById(id) {
  * Insert a new session with file processing metadata
  * @param {Object} sessionData - Session data from file processing
  * @param {string} sessionData.userId - User UUID from users table
- * @param {string} sessionData.filename - Original filename
- * @param {string} sessionData.fileType - MIME type of uploaded file
- * @param {number} sessionData.fileSize - File size in bytes
+ * @param {string} sessionData.filename - Original filename (optional)
+ * @param {string} sessionData.fileType - MIME type of uploaded file (optional)
+ * @param {number} sessionData.fileSize - File size in bytes (optional)
  * @param {string} sessionData.extractedText - Text extracted from file (optional)
+ * @param {string} sessionData.sessionType - Type of session (upload, extract, generate) (optional)
+ * @param {string} sessionData.analysisData - JSON string of analysis data (optional)
  * @returns {Object} - Inserted session data with UUID
  */
 export async function insertSession(sessionData) {

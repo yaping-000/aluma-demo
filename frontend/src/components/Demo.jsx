@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Onboarding from "./Onboarding"
 import FileUpload from "./FileUpload"
-import ContentGeneration from "./ContentGeneration"
+import Preview from "./Preview"
 import Results from "./Results"
 import { getApiBaseUrl } from "../lib/api"
 
@@ -17,7 +17,7 @@ const Demo = () => {
     idealClient: "",
     goals: "",
     emailContact: "Yes",
-    betaWaitlistConsent: "Yes",
+    betaWaitlistConsent: "No",
   })
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -30,6 +30,7 @@ const Demo = () => {
   const [contentCache, setContentCache] = useState({})
   const [lastGeneratedKey, setLastGeneratedKey] = useState("")
   const [isFromCache, setIsFromCache] = useState(false)
+  const [previewData, setPreviewData] = useState(null)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -110,10 +111,23 @@ const Demo = () => {
     return `${content.substring(0, 100)}_${sortedFormats.join("_")}`
   }
 
-  const handleGenerate = async () => {
-    if (!extractedText || selectedFormats.length === 0) return
+  const handleGenerate = async (previewDataFromStep = null) => {
+    console.log("handleGenerate called with:", previewDataFromStep)
+    const data = previewDataFromStep || previewData
+    console.log("Using data:", data)
+    console.log("extractedText:", extractedText)
 
-    const cacheKey = generateCacheKey(extractedText, selectedFormats)
+    if (
+      !extractedText ||
+      !data ||
+      !data.selectedFormats ||
+      data.selectedFormats.length === 0
+    ) {
+      console.log("Early return - missing data")
+      return
+    }
+
+    const cacheKey = generateCacheKey(extractedText, data.selectedFormats)
 
     // Check if we have cached content for this combination
     if (contentCache[cacheKey]) {
@@ -131,33 +145,81 @@ const Demo = () => {
 
     try {
       const baseUrl = getApiBaseUrl()
+      console.log("Making fetch request to:", `${baseUrl}/generate`)
+      const requestBody = {
+        content: extractedText,
+        formats: data.selectedFormats,
+        insights: data.insights,
+        userContext: formData,
+        userId: userId,
+        prompt: `You are an expert content creator and career coach. Your task is to generate ${data.selectedFormats.join(
+          ", "
+        )} content that incorporates the user's key insights while maintaining their authentic tone of voice.
+
+CONTENT GENERATION GUIDELINES:
+1. Use the provided key insights as the foundation for your content
+2. Analyze the original content to capture the user's authentic tone, style, and voice
+3. Create engaging, actionable content that reflects their personality and communication style
+4. Ensure the content feels personal and authentic to the user's voice
+5. Make the content actionable and valuable for their audience
+6. Generate ONE piece of content per format (not multiple posts)
+
+KEY INSIGHTS TO INCORPORATE:
+${data.insights}
+
+ORIGINAL CONTENT (for tone analysis):
+${extractedText}
+
+FORMATS TO GENERATE:
+${data.selectedFormats
+  .map((format) => {
+    switch (format) {
+      case "linkedin":
+        return "LinkedIn Post: Generate ONE professional, concise post (100-200 words) with clear value proposition, relevant hashtags, and call-to-action"
+      case "blog":
+        return "Blog Post: Generate ONE in-depth, storytelling piece (500-800 words) with actionable takeaways and educational value"
+      case "newsletter":
+        return "Newsletter: Generate ONE personal, conversational email with exclusive insights and relationship-building content"
+      default:
+        return format
+    }
+  })
+  .join("\n")}
+
+IMPORTANT: 
+- Generate ONLY ONE piece of content per format (not multiple posts)
+- Maintain the user's authentic voice and tone from their original content
+- Incorporate the key insights naturally into the content
+- Make each piece feel personal and genuine
+- Ensure the content provides real value to the audience
+- Keep the user's unique perspective and personality intact
+
+Generate the content in the requested formats.`,
+      }
+      console.log("Request body:", requestBody)
+
       const response = await fetch(`${baseUrl}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: extractedText,
-          formats: selectedFormats,
-          userContext: formData,
-          userId: userId,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) throw new Error("Generation failed")
 
-      const data = await response.json()
+      const responseData = await response.json()
 
       // Cache the generated content
       setContentCache((prev) => ({
         ...prev,
-        [cacheKey]: data.content,
+        [cacheKey]: responseData.content,
       }))
       setLastGeneratedKey(cacheKey)
-      setGeneratedContent(data.content)
+      setGeneratedContent(responseData.content)
       setIsFromCache(false)
     } catch (error) {
       console.error("Generation error:", error)
       alert("Content generation failed. Please try again.")
-      // Go back to content generation step on error
+      // Go back to preview step on error
       setStep(3)
     } finally {
       setIsGenerating(false)
@@ -175,6 +237,7 @@ const Demo = () => {
       profession: "",
       goals: "",
       emailContact: "Yes",
+      betaWaitlistConsent: "No",
     })
     setFile(null)
     setExtractedText("")
@@ -184,6 +247,7 @@ const Demo = () => {
     setContentCache({})
     setLastGeneratedKey("")
     setIsFromCache(false)
+    setPreviewData(null)
   }
 
   const handleUploadAnother = () => {
@@ -230,7 +294,7 @@ const Demo = () => {
               step > 3 ? "completed" : ""
             }`}
           >
-            3. Generate
+            3. Preview
           </div>
           <div className={`step ${step >= 4 ? "active" : ""}`}>4. Results</div>
         </div>
@@ -261,15 +325,16 @@ const Demo = () => {
       )}
 
       {step === 3 && (
-        <ContentGeneration
+        <Preview
           extractedText={extractedText}
-          selectedFormats={selectedFormats}
-          setSelectedFormats={setSelectedFormats}
-          handleGenerate={handleGenerate}
-          isGenerating={isGenerating}
+          onNext={(data) => {
+            console.log("Preview data received:", data)
+            // Store the preview data and trigger generation
+            setPreviewData(data)
+            handleGenerate(data)
+          }}
           onBack={() => setStep(2)}
-          contentCache={contentCache}
-          generateCacheKey={generateCacheKey}
+          userId={userId}
         />
       )}
 
