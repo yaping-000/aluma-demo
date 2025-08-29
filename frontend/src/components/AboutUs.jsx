@@ -70,12 +70,12 @@ const AboutUs = ({ isStandalone = false }) => {
             <div className="founder-text-column">
               <h3 className="founder-heading">Founder</h3>
               <p className="founder-text">
-                Hi, I'm Yaping Yang, a growth engineer with over 5 years of
-                experience helping fintech startups and enterprises scale. I've
-                seen how the right systems can accelerate growth—and I created
-                Aluma to bring that power to coaches. My passion lies in
-                building tools that allow you to do what you love, while Aluma
-                handles the rest.
+                Hi, I'm Yaping Yang, a growth engineer with years of experience
+                helping fintech startups and enterprises scale. I've seen how
+                the right systems can accelerate growth—and I created Aluma to
+                bring that power to coaches. My passion lies in building tools
+                that allow you to do what you love, while Aluma handles the
+                rest.
               </p>
             </div>
 
